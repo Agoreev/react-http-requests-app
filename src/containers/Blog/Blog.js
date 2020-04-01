@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import axios from "axios";
+//import axios from "axios";
+import axios from "../../axios";
 
 import Post from "../../components/Post/Post";
 import FullPost from "../../components/FullPost/FullPost";
@@ -9,19 +10,26 @@ import "./Blog.css";
 class Blog extends Component {
   state = {
     posts: [],
-    slectedPostId: 0
+    slectedPostId: 0,
+    error: false
   };
   componentDidMount() {
-    axios.get("https://jsonplaceholder.typicode.com/posts").then(response => {
-      const posts = response.data.slice(0, 4);
-      const updatedPosts = posts.map(post => {
-        return {
-          ...post,
-          author: "Artem"
-        };
+    axios
+      .get("/posts")
+      .then(response => {
+        const posts = response.data.slice(0, 4);
+        const updatedPosts = posts.map(post => {
+          return {
+            ...post,
+            author: "Artem"
+          };
+        });
+
+        this.setState({ posts: updatedPosts });
+      })
+      .catch(error => {
+        this.setState({ error: true });
       });
-      this.setState({ posts: updatedPosts });
-    });
   }
 
   postSelectedHandler = id => {
@@ -29,16 +37,20 @@ class Blog extends Component {
   };
 
   render() {
-    const posts = this.state.posts.map(post => {
-      return (
-        <Post
-          author={post.author}
-          key={post.id}
-          title={post.title}
-          clicked={() => this.postSelectedHandler(post.id)}
-        />
-      );
-    });
+    let posts = <p style={{ textAlign: "center" }}>Something went wrong</p>;
+    if (!this.state.error) {
+      posts = this.state.posts.map(post => {
+        return (
+          <Post
+            author={post.author}
+            key={post.id}
+            title={post.title}
+            clicked={() => this.postSelectedHandler(post.id)}
+          />
+        );
+      });
+    }
+
     return (
       <div>
         <section className="Posts">{posts}</section>
